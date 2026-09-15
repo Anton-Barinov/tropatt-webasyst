@@ -38,8 +38,9 @@ Webasyst (плагин ставится в `wa-apps/shop/plugins/tropatt/`).
 2. В админке Shop-Script: **Магазин → Настройки → Плагины** → у плагина «TropaTT CRM» нажмите
    **Установить**, затем откройте настройки и заполните поля (URL шлюза, ключ `stk_...`, секрет витрины,
    секрет вебхука, стадия по умолчанию, маппинг состояний).
-3. Проверьте маршрут вебхука: `https://shop.example.com/tropatt/webhook/` (маршрут добавляется плагином;
-   при необходимости очистите кэш Webasyst).
+3. Проверьте маршрут вебхука: `https://shop.example.com/tropatt/webhook/` (маршрут добавляется плагином —
+   для этого в `lib/config/plugin.php` объявлен флаг `'frontend' => true`, без него Webasyst не регистрирует
+   frontend-маршруты плагина и вебхук отвечает 404; при необходимости очистите кэш Webasyst).
 4. Укажите этот URL в карточке витрины в TropaTT CRM.
 
 ## 4. Схема обмена
@@ -62,7 +63,8 @@ Webasyst (плагин ставится в `wa-apps/shop/plugins/tropatt/`).
 ## 5. Файлы
 
 ```
-wa-apps/shop/plugins/tropatt/lib/config/plugin.php     манифест и обработчики order_action.*
+wa-apps/shop/plugins/tropatt/lib/config/plugin.php     манифест, флаг frontend и обработчики order_action.*
+wa-apps/shop/plugins/tropatt/img/tropatt.png           иконка плагина (48×48), объявлена в манифесте
 wa-apps/shop/plugins/tropatt/lib/config/settings.php   схема настроек плагина
 wa-apps/shop/plugins/tropatt/lib/config/routing.php    маршрут /tropatt/webhook/
 wa-apps/shop/plugins/tropatt/lib/shopTropatt.plugin.php  класс плагина (сбор и отправка заказа)
@@ -90,7 +92,7 @@ bash build.sh   # dist/tropatt-webasyst.zip
 | Заказы не уходят в CRM | Плагин включён, настройки заполнены; включите отладку и посмотрите журнал плагина |
 | В CRM нет заказа | Проверьте URL шлюза/ключ/секрет; заказ мог попасть в очередь (`wa()->getDataPath('queue')`) |
 | Вебхук отвечает 401 | `webhook_secret` должен совпадать с секретом витрины в CRM; проверьте время сервера (±300 с) |
-| Вебхук отвечает 404 | Маршрут `/tropatt/webhook/` не найден: очистите кэш Webasyst, проверьте `routing.php` |
+| Вебхук отвечает 404 | Маршрут `/tropatt/webhook/` не найден: очистите кэш Webasyst, проверьте `routing.php` и флаг `'frontend' => true` в `lib/config/plugin.php` |
 | Вебхук отвечает 422 | В маппинге нет пары для стадии CRM либо указано несуществующее действие workflow |
 | Статус меняется в CRM, а в Shop-Script нет | Проверьте маппинг и права плагина; состояние меняется только через `shopWorkflow` |
 
@@ -113,7 +115,8 @@ spooled locally. The CRM webhook (`/tropatt/webhook/`) applies status changes ex
 
 1. Unpack the archive into the Webasyst root so the plugin lands in `wa-apps/shop/plugins/tropatt/`.
 2. In Shop-Script: **Shop → Settings → Plugins** → install *TropaTT CRM*, then fill in the settings.
-3. Point the store webhook in TropaTT CRM at `https://shop.example.com/tropatt/webhook/`.
+3. Point the store webhook in TropaTT CRM at `https://shop.example.com/tropatt/webhook/` (the route is registered
+   by the plugin through the `'frontend' => true` flag in `lib/config/plugin.php`; without it the webhook answers 404).
 
 ## License
 
