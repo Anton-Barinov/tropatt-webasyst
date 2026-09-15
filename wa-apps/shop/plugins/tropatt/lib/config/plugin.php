@@ -12,7 +12,7 @@
 return array(
     'name' => 'TropaTT CRM — шлюз интернет-магазина',
     'description' => 'Двусторонняя синхронизация заказов, покупателей и статусов между Shop-Script (Webasyst) и TropaTT CRM.',
-    'version' => '1.0.1',
+    'version' => '1.0.3',
     'frontend' => true,
     'vendor' => 'Anton Barinov',
     'img' => 'img/tropatt.png',

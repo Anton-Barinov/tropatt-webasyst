@@ -62,6 +62,20 @@ class shopTropattPlugin extends shopPlugin
         $stage = shopTropattStatusMapper::crmStageFor($config['status_mapping'], (string)($order['state_id'] ?? ''));
         $canonical = shopTropattOrderMapper::toCanonical($order, $stage === null ? $config['default_stage'] : $stage);
 
+        // Retry what failed earlier before sending the current event: the spool
+        // used to be write-only, so an order that failed once stayed on disk
+        // forever (Shop-Script plugins on shared hosting have no cron to lean on).
+        $queueDir = $config['queue_dir'];
+        if (shopTropattFileQueue::count($queueDir) > 0) {
+            $flushed = shopTropattFileQueue::flush($queueDir, function ($spooled) use ($config) {
+                $sender = new shopTropattClient($config['gateway_url'], $config['store_key'], $config['store_secret'], $config['timeout']);
+
+                return $sender->pushOrder($spooled);
+            });
+
+            shopTropattLogger::write($config, 'spool drained', $flushed);
+        }
+
         $client = new shopTropattClient($config['gateway_url'], $config['store_key'], $config['store_secret'], $config['timeout']);
         $result = $client->pushOrder($canonical);
 
